@@ -2,6 +2,7 @@
 import os
 import re
 import json
+from datetime import datetime
 from collections import defaultdict
 
 import click
@@ -81,6 +82,7 @@ def generate(hints, model_name='345M', seed=None,
         saver.restore(sess, ckpt)
 
         for hint in hints:
+            print("[%s]begin to generate for: %s" % (datetime.utcnow(), hint))
             context_tokens = enc.encode(hint)
             for _ in range(nsamples // batch_size):
                 out = sess.run(output, feed_dict={
@@ -90,6 +92,8 @@ def generate(hints, model_name='345M', seed=None,
                     text = enc.decode(out_data)
                     text = postprocess(hint, text.strip())
                     results[hint].add(text)
+
+            print("[%s]finished generating for: %s" % (datetime.utcnow(), hint))
 
     return results
 
